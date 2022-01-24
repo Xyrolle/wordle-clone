@@ -6,7 +6,7 @@
     
     import { cells, state, rowClasses } from '../store.js';
     
-	import { isCharacterALetter, getRandomWord, wordInWocab } from '../utils.js';
+	import { isCharacterALetter, getRandomWord, wordInVocab } from '../utils.js';
     import { RowState, State } from '../constants.js';
 
     const word = getRandomWord();
@@ -31,7 +31,7 @@
     $: currentRow = Math.floor(lettersTyped / COLS);
     $: currentCol = lettersTyped % COLS;
 
-    const handleReveal = (idx) => {
+    const handleReveal = (idx: number) => {
         if (revealedRows[idx]) return;
 
         revealedRows[idx] = RowState.REVEALED;
@@ -88,10 +88,15 @@
         if (won || lost) return;
         $rowClasses[currentRow] = '';
         if (command === 'Enter') {
-            if (lettersTyped && currentCol === 0) {
+            const rowToCheck = currentCol === 0 && lettersTyped ? currentRow - 1 : currentRow;
+            const currentGuess = $cells[rowToCheck].reduce((prev, curr) => prev + curr.letter, '');
+            if (currentGuess.length === word.length && wordInVocab(currentGuess)) {
                 handleReveal(currentRow - 1);
-            } else if (wordInWocab()) {
-                $rowClasses[currentRow] = 'move';
+            } else if (currentGuess) {
+                // TODO: handle word equal currentGuess length
+                // word not in vocabulary
+                // else not enough letters
+                $rowClasses[rowToCheck] = 'move';
                 rowClasses.set($rowClasses);
             }
             

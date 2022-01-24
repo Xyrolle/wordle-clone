@@ -4,4 +4,4 @@ export const isCharacterALetter = (char) => (/[a-zA-Z]/).test(char);
 
 export const getRandomWord = () => words[Math.floor(Math.random() * words.length)];
 
-export const wordInWocab = (word) => words.filter(otherWord => otherWord === word.toLowerCase()).length === 1;
+export const wordInVocab = (word: string) => words.filter(otherWord => otherWord === word.toLowerCase()).length === 1;
