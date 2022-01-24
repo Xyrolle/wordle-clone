@@ -1,16 +1,11 @@
-<script>
-    import { state } from './store.js';
+<script lang="ts">
+    import { state } from '../store.js';
 
     export let handleCellClick;
     let stateKeys = Object.keys($state);
     
     console.log(stateKeys, $state);
 </script>
-
-
-
-<!-- keyboard
-<input /> -->
 
 <div class="keyboard">
     {#each stateKeys as key}

@@ -1,5 +1,5 @@
-<script>
-	import Game from './Game.svelte';
+<script lang="ts">
+	import Game from './components/Game.svelte';
 </script>
 
 <Game />

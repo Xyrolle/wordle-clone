@@ -1,13 +1,13 @@
-<script>
+<script lang="ts">
     import { onMount } from 'svelte';
 
     import Grid from './Grid.svelte';
 	import Keyboard from './Keyboard.svelte';
     
-    import { cells, state, rowClasses } from './store.js';
+    import { cells, state, rowClasses } from '../store.js';
     
-	import { isCharacterALetter, getRandomWord } from './utils.js';
-    import { State } from './constants.js';
+	import { isCharacterALetter, getRandomWord, wordInWocab } from '../utils.js';
+    import { RowState, State } from '../constants.js';
 
     const word = getRandomWord();
     const ROWS = 6,
@@ -23,7 +23,7 @@
 
     let lettersTyped = 0;
     let gameOver = false;
-    let revealedRows = Array.from({ length: 6 }, () => 0);
+    let revealedRows = Array.from({ length: ROWS }, () => RowState.NOT_REVEALED);
 
     $: won = false;
     $: lost = revealedRows.reduce((prev, curr) => prev + curr, 0) === 6 && !won;
@@ -34,7 +34,7 @@
     const handleReveal = (idx) => {
         if (revealedRows[idx]) return;
 
-        revealedRows[idx] = 1;
+        revealedRows[idx] = RowState.REVEALED;
 
         const indexesOfLetter = {};
         word.split('').forEach((letter, idx) => {
@@ -58,7 +58,7 @@
             won = true;
         }
 
-        $cells[idx].forEach((cell, idx) => {
+        $cells[idx].forEach((cell, idx: number) => {
             const letter = cell.letter;
             const letterState = $state[letter]
             let newLetterState = letterState;
@@ -80,24 +80,19 @@
         cells.set($cells);
     }
 
-    const handleKeys = (command) => {
+    const handleKeys = (command: string) => {
         handleKeyDown(undefined, command);
     }
 
-    $: console.log($rowClasses);
-
-    const handleKeyDown = (e, command) => {
+    const handleKeyDown = (e: KeyboardEvent, command = e.key) => {
         if (won || lost) return;
-
-        command = command ?? e.key;
         $rowClasses[currentRow] = '';
         if (command === 'Enter') {
             if (lettersTyped && currentCol === 0) {
                 handleReveal(currentRow - 1);
-            } else {
-                $rowClasses[currentRow] = 'move';;
+            } else if (wordInWocab()) {
+                $rowClasses[currentRow] = 'move';
                 rowClasses.set($rowClasses);
-                console.log('not all chars or word is not in words', currentCol)
             }
             
             return;
@@ -117,7 +112,7 @@
         }
     }
     
-    const updateCell = (letter) => {
+    const updateCell = (letter: string) => {
         let cellToUpdate = $cells[currentRow][currentCol];
         cellToUpdate.letter = letter.toLowerCase();
         cellToUpdate.cellClass = 'press';

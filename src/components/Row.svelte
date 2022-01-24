@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import Cell from './Cell.svelte';
 	
     export let cells = [];
