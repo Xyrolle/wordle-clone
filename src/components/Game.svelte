@@ -3,27 +3,22 @@
 
     import Grid from './Grid.svelte';
 	import Keyboard from './Keyboard.svelte';
+    import GameOverModal from './GameOverModal.svelte';
     
     import { cells, state, rowClasses } from '../store.js';
     
-	import { isCharacterALetter, getRandomWord, wordInVocab } from '../utils.js';
+	import { isCharacterALetter, getRandomWord, wordInVocab, createCellState, createKeyboardState, createRevealedRows } from '../utils.js';
     import { RowState, State } from '../constants.js';
 
-    const word = getRandomWord();
-    const ROWS = 6,
-            COLS = word.length;
+    let word = getRandomWord();
+    const ROWS = 6;
+    $: COLS = word.length;
 
-    const createCellState = () => Array.from({ length: ROWS }, 
-        () => Array.from({ length: COLS },
-            () => ({ letter: '', state: State.HIDDEN, cellClass: '' })
-        )
-    );
-
-    onMount(() => cells.set(createCellState()));
+    onMount(() => cells.set(createCellState(ROWS, COLS)));
 
     let lettersTyped = 0;
     let gameOver = false;
-    let revealedRows = Array.from({ length: ROWS }, () => RowState.NOT_REVEALED);
+    let revealedRows = createRevealedRows(ROWS);
 
     $: won = false;
     $: lost = revealedRows.reduce((prev, curr) => prev + curr, 0) === 6 && !won;
@@ -142,6 +137,24 @@
             cells.update(cells => cells);
         }
     }
+
+    const resetGame = () => {
+        word = getRandomWord();
+        const newCols = word.length;
+        lettersTyped = 0;
+        cells.set(createCellState(ROWS, newCols));
+        state.set(createKeyboardState());
+        revealedRows = createRevealedRows(newCols);
+        won = false;
+        lost = false;
+    }
+
+    /*
+    TODO:
+    const loadGameFromLocalStorage = () => {
+        
+    }
+    */
 </script>
 
 <svelte:window on:keydown={handleKeyDown} />
@@ -149,6 +162,7 @@
 <h1>WORDLE</h1>
 <Grid {won} {lost} rowClasses={$rowClasses} cells={$cells} />
 <Keyboard handleCellClick={handleKeys} />
+<GameOverModal {resetGame} {won} {lost} />
 
 <style>
     h1 {
