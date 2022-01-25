@@ -11,6 +11,7 @@
 <style>
 	.cell {
         font-size: 32px;
+        font-weight: bold;
 		display: flex;
 		justify-content: center;
 		align-items: center;
